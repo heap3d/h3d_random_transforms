@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package version="801">
+	<kit name="h3d_random_transforms" restart="YES">
+		<source target="h3d_random_transforms/index.cfg">index.cfg</source>
+		<source target="h3d_random_transforms/scripts/random_transforms.py">scripts/random_transforms.py</source>
+	</kit>
+	<message button="Help">h3d_random_transforms Kit installation complete.</message>
+</package>
