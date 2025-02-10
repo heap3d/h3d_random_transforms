@@ -11,6 +11,7 @@ import random
 
 import modo
 import modo.constants as c
+from modo import Vector3
 
 from h3d_utilites.scripts.h3d_utils import get_user_value
 
@@ -44,53 +45,89 @@ def main():
     random.seed()
 
     for item in selected:
-        pos = modo.Vector3(item.position.get())
-        rot = modo.Vector3(item.rotation.get())
-        scl = modo.Vector3(item.scale.get())
-
         if is_move:
-            range = modo.Vector3()
-            range.x = get_user_value(USERVAL_NAME_MOV_X)
-            range.y = get_user_value(USERVAL_NAME_MOV_Y)
-            range.z = get_user_value(USERVAL_NAME_MOV_Z)
+            variation = Vector3()
+            variation.x = get_user_value(USERVAL_NAME_MOV_X)
+            variation.y = get_user_value(USERVAL_NAME_MOV_Y)
+            variation.z = get_user_value(USERVAL_NAME_MOV_Z)
 
-            rnd_pos = modo.Vector3()
-            rnd_pos.x = pos.x + (random.random() * range.x) - range.x / 2
-            rnd_pos.y = pos.y + (random.random() * range.y) - range.y / 2
-            rnd_pos.z = pos.z + (random.random() * range.z) - range.z / 2
+            pos = Vector3(item.position.get())
+            rnd_pos = randomize_additive(pos, variation)
             item.position.set(rnd_pos)
 
         if is_rotate:
-            range = modo.Vector3()
-            range.x = get_user_value(USERVAL_NAME_ROT_X)
-            range.y = get_user_value(USERVAL_NAME_ROT_Y)
-            range.z = get_user_value(USERVAL_NAME_ROT_Z)
+            variation = Vector3()
+            variation.x = get_user_value(USERVAL_NAME_ROT_X)
+            variation.y = get_user_value(USERVAL_NAME_ROT_Y)
+            variation.z = get_user_value(USERVAL_NAME_ROT_Z)
 
-            rnd_rot = modo.Vector3()
-            rnd_rot.x = rot.x + (random.random() * range.x) - range.x / 2
-            rnd_rot.y = rot.y + (random.random() * range.y) - range.y / 2
-            rnd_rot.z = rot.z + (random.random() * range.z) - range.z / 2
+            rot = Vector3(item.rotation.get())
+            rnd_rot = randomize_additive(rot, variation)
             item.rotation.set(rnd_rot)
 
         if is_scale:
-            range = modo.Vector3()
-            range.x = get_user_value(USERVAL_NAME_SCL_X)
-            range.y = get_user_value(USERVAL_NAME_SCL_Y)
-            range.z = get_user_value(USERVAL_NAME_SCL_Z)
+            variation = Vector3()
+            variation.x = get_user_value(USERVAL_NAME_SCL_X)
+            variation.y = get_user_value(USERVAL_NAME_SCL_Y)
+            variation.z = get_user_value(USERVAL_NAME_SCL_Z)
 
-            rnd_scl = modo.Vector3()
-            if not is_uniform_scl:
-                rnd_scl.x = scl.x + scl.x * ((random.random() * range.x) - range.x / 2)
-                rnd_scl.y = scl.y + scl.y * ((random.random() * range.y) - range.y / 2)
-                rnd_scl.z = scl.z + scl.z * ((random.random() * range.z) - range.z / 2)
-            else:
-                uniscale = max(*range)
-                rnd_num = random.random()
-                rnd_scl.x = scl.x + scl.x * ((rnd_num * uniscale) - uniscale / 2)
-                rnd_scl.y = rnd_scl.x
-                rnd_scl.z = rnd_scl.x
-
+            scl = Vector3(item.scale.get())
+            rnd_scl = randomize_multiplicative(scl, variation, is_uniform_scl)
             item.scale.set(rnd_scl)
+
+
+def randomize_additive(transform: Vector3, variation: Vector3) -> Vector3:
+    rnd_transform = Vector3()
+    rnd_transform.x = shift_additive(transform.x, variation.x, random.random())
+    rnd_transform.y = shift_additive(transform.y, variation.y, random.random())
+    rnd_transform.z = shift_additive(transform.z, variation.z, random.random())
+
+    return rnd_transform
+
+
+def shift_additive(value: float, variation: float, factor: float) -> float:
+    return value + 2 * variation * factor - variation
+
+
+def randomize_multiplicative(
+    transform: Vector3, variation: Vector3, uniform: bool
+) -> Vector3:
+    rnd_transform = Vector3()
+    if not uniform:
+        rnd_transform.x = shift_multiplicative(
+            transform.x, variation.x, random.random()
+        )
+        rnd_transform.y = shift_multiplicative(
+            transform.y, variation.y, random.random()
+        )
+        rnd_transform.z = shift_multiplicative(
+            transform.z, variation.z, random.random()
+        )
+    else:
+        variation_uniform = get_uniform(variation)
+        random_uniform = random.random()
+        rnd_transform.x = shift_multiplicative(
+            transform.x, variation_uniform, random_uniform
+        )
+        rnd_transform.y = shift_multiplicative(
+            transform.y, variation_uniform, random_uniform
+        )
+        rnd_transform.z = shift_multiplicative(
+            transform.z, variation_uniform, random_uniform
+        )
+
+    return rnd_transform
+
+
+def shift_multiplicative(value: float, variation: float, factor: float) -> float:
+    max_value = value * (1 + variation)
+    min_value = 1 / max_value
+
+    return min_value + (max_value - min_value) * factor
+
+
+def get_uniform(variation: Vector3) -> float:
+    return max(*variation)
 
 
 if __name__ == "__main__":
