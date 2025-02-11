@@ -9,11 +9,19 @@
 
 import random
 
-import modo
 import modo.constants as c
-from modo import Vector3
+from modo import Vector3, Item, Scene
 
-from h3d_utilites.scripts.h3d_utils import get_user_value
+from h3d_utilites.scripts.h3d_utils import (
+    get_user_value,
+    item_get_position,
+    item_get_rotation,
+    item_get_scale,
+    item_set_position,
+    item_set_rotation,
+    item_set_scale,
+)
+
 
 USERVAL_NAME_MOV_X = "h3d_rtf_mov_X"
 USERVAL_NAME_MOV_Y = "h3d_rtf_mov_Y"
@@ -31,7 +39,7 @@ USERVAL_NAME_ENABLE_UNIFORM_SCALE = "h3d_rtf_uniform_scale"
 
 
 def main():
-    selected: list[modo.Item] = modo.Scene().selectedByType(
+    selected: list[Item] = Scene().selectedByType(
         itype=c.LOCATOR_TYPE, superType=True
     )
     if not selected:
@@ -51,9 +59,9 @@ def main():
             variation.y = get_user_value(USERVAL_NAME_MOV_Y)
             variation.z = get_user_value(USERVAL_NAME_MOV_Z)
 
-            pos = Vector3(item.position.get())
+            pos = item_get_position(item)
             rnd_pos = randomize_additive(pos, variation)
-            item.position.set(rnd_pos)
+            item_set_position(item, rnd_pos)
 
         if is_rotate:
             variation = Vector3()
@@ -61,9 +69,9 @@ def main():
             variation.y = get_user_value(USERVAL_NAME_ROT_Y)
             variation.z = get_user_value(USERVAL_NAME_ROT_Z)
 
-            rot = Vector3(item.rotation.get())
+            rot = item_get_rotation(item)
             rnd_rot = randomize_additive(rot, variation)
-            item.rotation.set(rnd_rot)
+            item_set_rotation(item, rnd_rot)
 
         if is_scale:
             variation = Vector3()
@@ -71,9 +79,9 @@ def main():
             variation.y = get_user_value(USERVAL_NAME_SCL_Y)
             variation.z = get_user_value(USERVAL_NAME_SCL_Z)
 
-            scl = Vector3(item.scale.get())
+            scl = item_get_scale(item)
             rnd_scl = randomize_multiplicative(scl, variation, is_uniform_scl)
-            item.scale.set(rnd_scl)
+            item_set_scale(item, rnd_scl)
 
 
 def randomize_additive(transform: Vector3, variation: Vector3) -> Vector3:
