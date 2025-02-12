@@ -39,9 +39,7 @@ USERVAL_NAME_ENABLE_UNIFORM_SCALE = "h3d_rtf_uniform_scale"
 
 
 def main():
-    selected: list[Item] = Scene().selectedByType(
-        itype=c.LOCATOR_TYPE, superType=True
-    )
+    selected: list[Item] = Scene().selectedByType(itype=c.LOCATOR_TYPE, superType=True)
     if not selected:
         return
 
